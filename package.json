@@ -1,0 +1,23 @@
+{
+  "name": "hercules-base",
+  "version": "1.0.0",
+  "description": "Update delivery service for Project Ignis: EDOPro and related assets",
+  "main": "src/app.js",
+  "repository": "https://github.com/ProjectIgnis/HerculesBase.git",
+  "author": "Kevin Lu, Hel; Project Ignis",
+  "license": "AGPL-3.0-or-later",
+  "private": true,
+  "scripts": {
+    "start": "nodemon src/index.js"
+  },
+  "dependencies": {
+    "better-sqlite3": "^6.0.1",
+    "debug": "^4.1.1",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "morgan": "^1.10.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  }
+}
