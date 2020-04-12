@@ -1,7 +1,9 @@
 const debug = require("debug");
 const express = require("express");
 const morgan = require("morgan");
+
 const logger = debug("hercules-base");
+const db = require("./db.js");
 
 const app = express();
 // combined + response time
@@ -23,6 +25,8 @@ app.get("/", (req, res, next) => {
     }
 });
 
-app.get("/", (req, res) => res.sendStatus(204));
+app.get("/", (req, res) => {
+
+});
 
 module.exports = app;
