@@ -25,8 +25,35 @@ app.get("/", (req, res, next) => {
     }
 });
 
+// GET a JSON of needed patch downloads
 app.get("/", (req, res) => {
 
+});
+
+// POST metadata for a new patch
+app.post("/version", express.json(), (req, res) => {
+    try {
+        const {
+            authToken,
+            url,
+            os,
+            major,
+            minor,
+            patch,
+            hash
+        } = req.body;
+        if (authToken !== process.env.HERCULES_BASE_SECRET) {
+            res.sendStatus(401);
+        }
+        const statement = db.prepare(`INSERT INTO urls (url, os, major, minor, patch, hash, date)
+            VALUES (@url, @os, @major, @minor, @patch, @hash, @date)`);
+        const result = db.transaction(() => statement.run({ url, os, major, minor, patch, hash, date: Date.now() }))();
+        logger("Added new entry %o", result);
+        res.sendStatus(201);
+    } catch(e) {
+        logger("Failed to add entry %o", e);
+        res.sendStatus(400);
+    }
 });
 
 module.exports = app;
