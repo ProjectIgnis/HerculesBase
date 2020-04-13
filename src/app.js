@@ -15,10 +15,12 @@ app.get("/", (req, res, next) => {
     const userAgent = versionString.match(/EDOPRO-(WINDOWS|MAC|LINUX)-(\d+)\.(\d+)\.(\d+)/i);
     if (userAgent) {
         logger(`Detected user agent ${userAgent[0]} from %s`, req.query.version ? "query string" : "header");
-        req.params.platform = userAgent[1].toUpperCase();
-        req.params.major = parseInt(userAgent[2]);
-        req.params.minor = parseInt(userAgent[3]);
-        req.params.patch = parseInt(userAgent[4]);
+        req.userAgent = {
+            os: userAgent[1].toUpperCase(),
+            major: parseInt(userAgent[2]),
+            minor: parseInt(userAgent[3]),
+            patch: parseInt(userAgent[4])
+        };
         next();
     } else {
         res.status(400).send("Missing version parameter");
@@ -27,7 +29,24 @@ app.get("/", (req, res, next) => {
 
 // GET a JSON of needed patch downloads
 app.get("/", (req, res) => {
-
+    const { os, major, minor, patch } = req.userAgent;
+    const queryCache = db.prepare("SELECT json FROM responses WHERE os = ? AND major = ? AND minor = ? AND patch = ?");
+    const cache = queryCache.all([ os, major, minor, patch ]);
+    if (cache.length) {
+        logger(`Cache hit for ${os}/${major}.${minor}.${patch}`);
+        res.send(cache[0].json);
+    } else {
+        logger(`Cache miss for ${os}/${major}.${minor}.${patch}`);
+        const queryPatches = db.prepare("SELECT (major || '.' || minor || '.' || patch) as name, hash as md5, url FROM urls WHERE name > ? AND os = ? ORDER BY name ASC");
+        const result = queryPatches.all(`${major}.${minor}.${patch}`, os);
+        res.json(result);
+        const cacheInsert = db.prepare("INSERT INTO responses (os, major, minor, patch, json) VALUES (@os, @major, @minor, @patch, @json)");
+        try {
+            cacheInsert.run({ os, major, minor, patch, json: JSON.stringify(result) });
+        } catch(err) {
+            logger("Failed to cache result %o", err);
+        }
+    }
 });
 
 // POST metadata for a new patch
@@ -37,9 +56,9 @@ app.post("/version", express.json(), (req, res) => {
             authToken,
             url,
             os,
-            major,
-            minor,
-            patch,
+            major = parseInt(major),
+            minor = parseInt(minor),
+            patch = parseInt(minor),
             hash
         } = req.body;
         if (authToken !== process.env.HERCULES_BASE_SECRET) {

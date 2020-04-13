@@ -2,7 +2,6 @@
   "name": "hercules-base",
   "version": "1.0.0",
   "description": "Update delivery service for Project Ignis: EDOPro and related assets",
-  "main": "src/app.js",
   "repository": "https://github.com/ProjectIgnis/HerculesBase.git",
   "author": "Kevin Lu, Hel; Project Ignis",
   "license": "AGPL-3.0-or-later",
