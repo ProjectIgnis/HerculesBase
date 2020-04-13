@@ -70,6 +70,9 @@ app.post("/version", express.json(), (req, res) => {
             VALUES (@url, @os, @major, @minor, @patch, @hash, @date)`);
         const result = db.transaction(() => statement.run({ url, os, major, minor, patch, hash, date: Date.now() }))();
         logger("Added new entry %o", result);
+        const statement_delete = db.prepare("DELETE FROM responses");
+        const deleted_row = statement_delete.run();
+        logger("Deleted %o entry from Cache Database", deleted_row.changes);
         res.sendStatus(201);
     } catch(e) {
         logger("Failed to add entry %o", e);
