@@ -230,7 +230,7 @@ describe('Unit Testing of App.js', function() {
 		.expect(201, done)
 	});
 
-	it('[Unit Test] POST to /version End-Point with correct input 4/5', function(done) {
+	it('[Unit Test] POST to /version End-Point with correct input 5/5', function(done) {
 		request(server)
 		.post('/version')
 		.send({
@@ -254,7 +254,7 @@ describe('Unit Testing of App.js', function() {
 		.expect([
 			{
 				name: '38.0.1',
-				hash: '12345',
+				md5: '12345',
 				url: 'http://www.example.com'
 			}
 		])
