@@ -1,0 +1,27 @@
+version: "3"
+
+services:
+  hercules-base:
+    image: projectignis/hercules-base
+    build: .
+    environment:
+      - HERCULES_BASE_PORT=${HERCULES_BASE_PORT}
+      - HERCULES_BASE_DB=${HERCULES_BASE_DB}
+      - HERCULES_BASE_SECRET=${HERCULES_BASE_SECRET}
+    expose:
+      - ${HERCULES_BASE_PORT}
+    volumes:
+      - ./${HERCULES_BASE_DB}:/hercules-base/${HERCULES_BASE_DB}
+
+  minio:
+    image: minio/minio:latest
+    ports:
+      - "${MINIO_HOST_PORT}:9000"
+    environment:
+      - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+      - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    volumes:
+      - ./minio:/minio
+    command: server /minio
+
+

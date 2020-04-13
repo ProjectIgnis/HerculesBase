@@ -1,0 +1,15 @@
+minio/
+node_modules/
+.env
+.vscode/
+.DS_Store
+*.db
+
+.git/
+.dockerignore
+.editorconfig
+.gitattributes
+.gitignore
+docker-compose.yaml
+Dockerfile
+sample.env
