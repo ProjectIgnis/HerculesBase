@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const debug = require("debug");
 const express = require("express");
 const morgan = require("morgan");
@@ -12,7 +14,7 @@ app.use(morgan(`:remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:htt
 // Parse either query string or User-Agent for baseline version
 app.get("/", (req, res, next) => {
     const versionString = req.query.version || req.headers["user-agent"];
-    const userAgent = versionString.match(/EDOPRO-(WINDOWS|MAC|LINUX)-(\d+)\.(\d+)\.(\d+)/i);
+    const userAgent = versionString.match(/^EDOPRO-(WINDOWS|MAC|LINUX)-(\d+)\.(\d+)\.(\d+)$/i);
     if (userAgent) {
         logger(`Detected user agent ${userAgent[0]} from %s`, req.query.version ? "query string" : "header");
         req.userAgent = {
@@ -34,7 +36,7 @@ app.get("/", (req, res) => {
     const cache = queryCache.all([ os, major, minor, patch ]);
     if (cache.length) {
         logger(`Cache hit for ${os}/${major}.${minor}.${patch}`);
-        res.send(cache[0].json);
+        res.json(cache[0].json);
     } else {
         logger(`Cache miss for ${os}/${major}.${minor}.${patch}`);
         const queryPatches = db.prepare("SELECT (major || '.' || minor || '.' || patch) as name, hash as md5, url FROM urls WHERE name > ? AND os = ? ORDER BY name ASC");
@@ -75,4 +77,8 @@ app.post("/version", express.json(), (req, res) => {
     }
 });
 
-module.exports = app;
+let server = app.listen(process.env.HERCULES_BASE_PORT || 3000, () => {
+    debug("hercules-base")(`Listening on ${process.env.HERCULES_BASE_PORT}.`);
+});
+
+module.exports = server;
