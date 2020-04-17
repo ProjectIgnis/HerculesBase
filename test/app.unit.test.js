@@ -262,7 +262,9 @@ describe('Unit Testing of App.js', function() {
 	});
 
 	after(function(done) {
-		fs.unlinkSync(process.env.HERCULES_BASE_DB);
-		server.close(done);
+        server.close(() => {
+            fs.unlinkSync(process.env.HERCULES_BASE_DB);
+            done();
+        });
 	});
 });
