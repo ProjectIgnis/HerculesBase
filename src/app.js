@@ -80,8 +80,13 @@ app.post("/version", express.json(), (req, res) => {
     }
 });
 
-let server = app.listen(process.env.HERCULES_BASE_PORT || 3000, () => {
-    debug("hercules-base")(`Listening on ${process.env.HERCULES_BASE_PORT}.`);
+const server = app.listen(process.env.HERCULES_BASE_PORT || 3000, () => {
+    logger(`Listening on ${process.env.HERCULES_BASE_PORT}.`);
+});
+
+server.on("close", () => {
+    logger("Closing database connection.");
+    db.close();
 });
 
 module.exports = server;
