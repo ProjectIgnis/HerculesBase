@@ -60,22 +60,22 @@ app.post("/version", express.json(), (req, res) => {
             os,
             major = parseInt(major),
             minor = parseInt(minor),
-            patch = parseInt(minor),
+            patch = parseInt(patch),
             hash
         } = req.body;
         if (authToken !== process.env.HERCULES_BASE_SECRET) {
-            res.sendStatus(401);
+            return res.sendStatus(401);
         }
         if (!url || !os || !hash || isNaN(major) || isNaN(minor) || isNaN(patch)) {
-            res.sendStatus(400);
+            return res.sendStatus(400);
         }
-        const statement = db.prepare(`INSERT INTO urls (url, os, major, minor, patch, hash, date)
+        const statementInsert = db.prepare(`INSERT INTO urls (url, os, major, minor, patch, hash, date)
             VALUES (@url, @os, @major, @minor, @patch, @hash, @date)`);
-        const result = db.transaction(() => statement.run({ url, os, major, minor, patch, hash, date: Date.now() }))();
+        const result = statementInsert.run({ url, os, major, minor, patch, hash, date: Date.now() });
         logger("Added new entry %o", result);
-        const statement_delete = db.prepare("DELETE FROM responses");
-        const deleted_row = statement_delete.run();
-        logger("Deleted %o entry from Cache Database", deleted_row.changes);
+        const statementDelete = db.prepare("DELETE FROM responses");
+        const deleted = statementDelete.run();
+        logger("Flushed cache database, deleting %o", deleted.changes);
         res.sendStatus(201);
     } catch(e) {
         logger("Failed to add entry %o", e);
