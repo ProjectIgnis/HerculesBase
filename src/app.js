@@ -7,6 +7,12 @@ const morgan = require("morgan");
 const logger = debug("hercules-base");
 const db = require("./db.js");
 
+function flushResponseCache() {
+    const statementDelete = db.prepare("DELETE FROM responses");
+    const deleted = statementDelete.run();
+    logger("Flushed cache database, deleting %o", deleted.changes);
+}
+
 const app = express();
 // combined + response time
 app.use(morgan(`:remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms`));
@@ -73,12 +79,41 @@ app.post("/version", express.json(), (req, res) => {
             VALUES (@url, @os, @major, @minor, @patch, @hash, @date)`);
         const result = statementInsert.run({ url, os, major, minor, patch, hash, date: Date.now() });
         logger("Added new entry %o", result);
-        const statementDelete = db.prepare("DELETE FROM responses");
-        const deleted = statementDelete.run();
-        logger("Flushed cache database, deleting %o", deleted.changes);
+        flushResponseCache();
         res.sendStatus(201);
     } catch(e) {
         logger("Failed to add entry %o", e);
+        res.sendStatus(400);
+    }
+});
+
+// DELETE version entry by OS and version, optionally verifying hash first
+app.delete("/version", express.json(), (req, res) => {
+    if (req.body.authToken !== process.env.HERCULES_BASE_SECRET) {
+        return res.sendStatus(401);
+    }
+    try {
+        const {
+            os,
+            major = parseInt(major),
+            minor = parseInt(minor),
+            patch = parseInt(patch)
+        } = req.body;
+        if (!os || isNaN(major) || isNaN(minor) || isNaN(patch)) {
+            return res.sendStatus(400);
+        }
+        let sql = "DELETE FROM urls WHERE os = ? AND major = ? AND minor = ? AND patch = ?";
+        let result;
+        if (req.body.hash) {
+            sql += " AND hash = ?";
+            result = db.prepare(sql).run(os, major, minor, patch, hash);
+        } else {
+            result = db.prepare(sql).run(os, major, minor, patch);
+        }
+        logger("Deleted entry %o", result);
+        flushResponseCache();
+        res.sendStatus(204);
+    } catch (e) {
         res.sendStatus(400);
     }
 });
