@@ -66,6 +66,9 @@ app.post("/version", express.json(), (req, res) => {
         if (authToken !== process.env.HERCULES_BASE_SECRET) {
             res.sendStatus(401);
         }
+        if (!url || !os || !hash || isNaN(major) || isNaN(minor) || isNaN(patch)) {
+            res.sendStatus(400);
+        }
         const statement = db.prepare(`INSERT INTO urls (url, os, major, minor, patch, hash, date)
             VALUES (@url, @os, @major, @minor, @patch, @hash, @date)`);
         const result = db.transaction(() => statement.run({ url, os, major, minor, patch, hash, date: Date.now() }))();
