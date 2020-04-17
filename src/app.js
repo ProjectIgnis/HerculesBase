@@ -111,8 +111,12 @@ app.delete("/version", express.json(), (req, res) => {
             result = db.prepare(sql).run(os, major, minor, patch);
         }
         logger("Deleted entry %o", result);
-        flushResponseCache();
-        res.sendStatus(204);
+        if (result.changes) {
+            flushResponseCache();
+            res.sendStatus(204);
+        } else {
+            res.sendStatus(404);
+        }
     } catch (e) {
         res.sendStatus(400);
     }
