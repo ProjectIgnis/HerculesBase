@@ -261,6 +261,60 @@ describe('Unit Testing of App.js', function() {
 		.expect(200, done)
 	});
 
+    it('[Unit Test] Unauthorized DELETE /version', function (done) {
+		request(server)
+		.delete('/version')
+		.send({
+            authToken: 'A Bad Auth Token'
+        })
+        .expect(401, done);
+    });
+
+    it('[Unit Test] Malformed DELETE /version', function (done) {
+        request(server)
+        .delete('/version')
+        .send({
+            authToken: process.env.HERCULES_BASE_SECRET,
+            major: 'not an int'
+        })
+        .expect(400, done);
+    });
+
+    it('[Unit Test] DELETE /version with unknown entry is a 404', function(done) {
+        request(server)
+        .delete('/version')
+        .send({
+            authToken: process.env.HERCULES_BASE_SECRET,
+            os: 'FreeBSD',
+            major: 37,
+            minor: 3,
+            patch: 0
+        })
+        .expect(404, done);
+    });
+
+    it('[Unit Test] DELETE /version results in 204', function(done) {
+        request(server)
+        .delete('/version')
+        .send({
+            authToken: process.env.HERCULES_BASE_SECRET,
+            os: 'Linux',
+            major: 38,
+            minor: 0,
+            patch: 1
+        })
+        .expect(204, done);
+    })
+
+    it('[Unit Test] GET / after deleting entries', function(done) {
+		request(server)
+		.get('/')
+		.set('User-Agent', 'EDOPRO-Linux-38.0.0')
+		.expect('Content-Type', 'application/json; charset=utf-8')
+		.expect([])
+		.expect(200, done)
+    });
+
 	after(function(done) {
         server.close(() => {
             fs.unlinkSync(process.env.HERCULES_BASE_DB);
