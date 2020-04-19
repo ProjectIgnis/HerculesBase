@@ -42,7 +42,8 @@ app.get("/", (req, res) => {
     const cache = queryCache.all([ os, major, minor, patch ]);
     if (cache.length) {
         logger(`Cache hit for ${os}/${major}.${minor}.${patch}`);
-        res.json(cache[0].json);
+        res.set("Content-Type", "application/json");
+        res.send(cache[0].json);
     } else {
         logger(`Cache miss for ${os}/${major}.${minor}.${patch}`);
         const queryPatches = db.prepare("SELECT (major || '.' || minor || '.' || patch) as name, hash as md5, url FROM urls WHERE name > ? AND os = ? ORDER BY name ASC");
