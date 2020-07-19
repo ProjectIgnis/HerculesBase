@@ -1,6 +1,6 @@
 {
   "name": "hercules-base",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Update delivery service for Project Ignis: EDOPro and related assets",
   "repository": "https://github.com/ProjectIgnis/HerculesBase.git",
   "author": "Kevin Lu, Hel; Project Ignis",
