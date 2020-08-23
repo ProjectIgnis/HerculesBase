@@ -1,4 +1,4 @@
-version: "3"
+version: "2"
 
 services:
   hercules-base:
@@ -10,6 +10,8 @@ services:
       - HERCULES_BASE_SECRET=${HERCULES_BASE_SECRET}
     expose:
       - ${HERCULES_BASE_PORT}
+    ports:
+      - "${HERCULES_BASE_HOST}:${HERCULES_BASE_PORT}"
     volumes:
       - ./${HERCULES_BASE_DB}:/hercules-base/${HERCULES_BASE_DB}
 
@@ -18,8 +20,8 @@ services:
     environment:
       - MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
       - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
+    ports:
+      - "${MINIO_HOST}:9000"
     volumes:
       - ./minio:/minio
     command: server /minio
-
-
