@@ -20,7 +20,7 @@ app.use(morgan(`:remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:htt
 // Parse either query string or User-Agent for baseline version
 app.get("/", (req, res, next) => {
     const versionString = req.query.version || req.headers["user-agent"];
-    const userAgent = versionString.match(/^EDOPRO-(WINDOWS|MAC|LINUX)-(\d+)\.(\d+)\.(\d+)$/i);
+    const userAgent = versionString.match(/^EDOPRO-(WINDOWS|MAC|LINUX|ANDROID)-(\d+)\.(\d+)\.(\d+)$/i);
     if (userAgent) {
         logger(`Detected user agent ${userAgent[0]} from %s`, req.query.version ? "query string" : "header");
         req.userAgent = {
