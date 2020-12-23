@@ -50,14 +50,14 @@ describe('Unit Testing of App.js', function() {
 		request(server)
 		.get('/')
 		.set('User-Agent', 'EDOPRO-LINUX-3.9.4.3.2.')
-		.expect(400, done)
+		.expect(200, done)
 	});
 
 	it('[Unit Test] Check for false version number 5/10', function(done) {
 		request(server)
 		.get('/')
 		.set('User-Agent', 'EDOPRO-LINUX-1.2.3alert(\'hek\'')
-		.expect(400, done)
+		.expect(200, done)
 	});
 
 	it('[Unit Test] Check for false version number 6/10', function(done) {
@@ -165,7 +165,7 @@ describe('Unit Testing of App.js', function() {
 		.expect(400, done)
 	});
 
-	it('[Unit Test] POST to /version End-Point with correct input 1/5', function(done) {
+	it('[Unit Test] POST to /version End-Point with correct input 1/6', function(done) {
 		request(server)
 		.post('/version')
 		.send({
@@ -181,7 +181,7 @@ describe('Unit Testing of App.js', function() {
 		.expect(201, done)
 	});
 
-	it('[Unit Test] POST to /version End-Point with correct input 2/5', function(done) {
+	it('[Unit Test] POST to /version End-Point with correct input 2/6', function(done) {
 		request(server)
 		.post('/version')
 		.send({
@@ -198,7 +198,7 @@ describe('Unit Testing of App.js', function() {
 	});
 
 
-	it('[Unit Test] POST to /version End-Point with correct input 3/5', function(done) {
+	it('[Unit Test] POST to /version End-Point with correct input 3/6', function(done) {
 		request(server)
 		.post('/version')
 		.send({
@@ -214,7 +214,7 @@ describe('Unit Testing of App.js', function() {
 		.expect(201, done)
 	});
 
-	it('[Unit Test] POST to /version End-Point with correct input 4/5', function(done) {
+	it('[Unit Test] POST to /version End-Point with correct input 4/6', function(done) {
 		request(server)
 		.post('/version')
 		.send({
@@ -230,7 +230,7 @@ describe('Unit Testing of App.js', function() {
 		.expect(201, done)
 	});
 
-	it('[Unit Test] POST to /version End-Point with correct input 5/5', function(done) {
+	it('[Unit Test] POST to /version End-Point with correct input 5/6', function(done) {
 		request(server)
 		.post('/version')
 		.send({
@@ -245,6 +245,38 @@ describe('Unit Testing of App.js', function() {
 		})
 		.expect(201, done)
 	});
+
+	it('[Unit Test] POST to /version End-Point with correct input 6/6', function(done) {
+		request(server)
+		.post('/version')
+		.send({
+	        authToken: process.env.HERCULES_BASE_SECRET,
+            url: 'http://www.example.com',
+            os: 'Android',
+            major: '39',
+            minor: '2',
+            patch: '1',
+            hash: '12345'
+
+		})
+		.expect(201, done)
+	});
+
+	it('[Unit Test] GET User-Agent', function(done) {
+		request(server)
+		.get('/')
+		.set('User-Agent', 'EDOPRO-Android-39.0.0 anything else')
+		.expect('Content-Type', 'application/json; charset=utf-8')
+		.expect([
+			{
+				name: '39.2.1',
+				md5: '12345',
+				url: 'http://www.example.com'
+			}
+		])
+		.expect(200, done)
+	});
+
 
 	it('[Unit Test] GET / after adding entries', function(done) {
 		request(server)

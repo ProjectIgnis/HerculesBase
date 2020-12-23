@@ -20,14 +20,15 @@ app.use(morgan(`:remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:htt
 // Parse either query string or User-Agent for baseline version
 app.get("/", (req, res, next) => {
     const versionString = req.query.version || req.headers["user-agent"];
-    const userAgent = versionString.match(/^EDOPRO-(WINDOWS|MAC|LINUX|ANDROID)-(\d+)\.(\d+)\.(\d+)$/i);
+    const userAgent = versionString.match(/^EDOPRO-(WINDOWS|MAC|LINUX|ANDROID)-(\d+)\.(\d+)\.(\d+)(.*)$/i);
     if (userAgent) {
         logger(`Detected user agent ${userAgent[0]} from %s`, req.query.version ? "query string" : "header");
         req.userAgent = {
             os: userAgent[1].toUpperCase(),
             major: parseInt(userAgent[2]),
             minor: parseInt(userAgent[3]),
-            patch: parseInt(userAgent[4])
+            patch: parseInt(userAgent[4]),
+	    other: userAgent[5]
         };
         next();
     } else {
@@ -37,7 +38,7 @@ app.get("/", (req, res, next) => {
 
 // GET a JSON of needed patch downloads
 app.get("/", (req, res) => {
-    const { os, major, minor, patch } = req.userAgent;
+    const { os, major, minor, patch, other } = req.userAgent;
     const queryCache = db.prepare("SELECT json FROM responses WHERE os = ? AND major = ? AND minor = ? AND patch = ?");
     const cache = queryCache.all([ os, major, minor, patch ]);
     if (cache.length) {
